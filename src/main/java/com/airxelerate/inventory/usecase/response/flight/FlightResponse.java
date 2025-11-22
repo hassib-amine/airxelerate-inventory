@@ -1,9 +1,11 @@
 package com.airxelerate.inventory.usecase.response.flight;
 
-import com.airxelerate.inventory.persistence.entity.flight.Flight;
-
 import java.time.LocalDate;
 
+/**
+ * Flight Response DTO
+ * Represents flight information in API responses
+ */
 public record FlightResponse(
         Long id,
         String carrierCode,
@@ -12,14 +14,4 @@ public record FlightResponse(
         String origin,
         String destination
 ) {
-    public static FlightResponse fromEntity(Flight flight) {
-        return new FlightResponse(
-                flight.getId(),
-                flight.getCarrierCode(),
-                flight.getFlightNumber(),
-                flight.getFlightDate(),
-                flight.getOrigin(),
-                flight.getDestination()
-        );
-    }
 }
