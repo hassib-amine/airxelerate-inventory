@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
  * Data Initializer
  * Creates initial user accounts on application startup
  */
+@Deprecated
 @Component
 @RequiredArgsConstructor
 @Slf4j
