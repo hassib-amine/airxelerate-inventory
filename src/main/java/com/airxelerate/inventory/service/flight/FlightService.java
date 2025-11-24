@@ -1,9 +1,9 @@
 package com.airxelerate.inventory.service.flight;
 
 import com.airxelerate.inventory.usecase.request.flight.FlightRequest;
+import com.airxelerate.inventory.usecase.response.common.PagedResponse;
 import com.airxelerate.inventory.usecase.response.flight.FlightResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Flight Service Interface
@@ -27,11 +27,12 @@ public interface FlightService {
     FlightResponse getFlightById(Long id);
 
     /**
-     * Retrieves all flights
+     * Retrieves all flights with pagination
      *
-     * @return List of FlightResponse containing all flight details
+     * @param pageable pagination parameters (page, size, sort)
+     * @return PagedResponse containing paginated flight details
      */
-    List<FlightResponse> getAllFlights();
+    PagedResponse<FlightResponse> getAllFlights(Pageable pageable);
 
     /**
      * Deletes a flight by its ID
