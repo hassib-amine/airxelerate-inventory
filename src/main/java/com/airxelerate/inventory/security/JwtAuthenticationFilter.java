@@ -21,6 +21,7 @@ import java.util.Collections;
 /**
  * JWT Authentication Filter
  * Intercepts requests and validates JWT tokens
+ * this filter only validates tokens and sets authentication context
  */
 @Component
 @RequiredArgsConstructor
@@ -31,18 +32,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtTokenProvider tokenProvider;
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        return path != null && (
-                path.startsWith("/h2-console") ||
-                        path.startsWith("/api/auth") ||
-                        path.startsWith("/swagger-ui") ||
-                        path.startsWith("/api-docs") ||
-                        path.startsWith("/v3/api-docs")
-        );
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -65,6 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception ex) {
             logger.error("Could not set user authentication in security context", ex);
+            // Continue filter chain - let Spring Security handle unauthorized requests
         }
 
         filterChain.doFilter(request, response);
