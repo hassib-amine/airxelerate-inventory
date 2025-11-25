@@ -2,35 +2,38 @@
 spring:
   application:
     name: flight-inventory
-    # Database (MySQL)
+  profiles:
+    active: ${AIRXELERATE_INVENTORY_ENV:local}
+  # Database (MySQL) - values from application-local.yml
   datasource:
-    url: jdbc:mysql://localhost:3306/airxelerate_inventory_db?createDatabaseIfNotExist=true&serverTimezone=UTC
-    username: root
-    password: root
+    url: ${airxelerate.inventory.datasource.url}
+    username: ${airxelerate.inventory.datasource.username}
+    password: ${airxelerate.inventory.datasource.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: ${airxelerate.inventory.jpa.ddl-auto}
+    show-sql: ${airxelerate.inventory.jpa.show-sql}
     properties:
       hibernate:
-        format_sql: true
+        format_sql: ${airxelerate.inventory.jpa.format-sql}
         dialect: org.hibernate.dialect.MySQLDialect
 
 server:
-  port: 9090
+  port: ${airxelerate.inventory.server.port}
 
-# JWT Configuration
+# JWT Configuration - values from application-local.yml
 jwt:
-  secret: 578c4249e79647b6d1dc9fe66a8c170e16a1a66df47fe6e85ff17516febb0740
-  expiration: 3600000
+  secret: ${airxelerate.inventory.jwt.secret}
+  expiration: ${airxelerate.inventory.jwt.expiration}
 
 # Logging
 logging:
   level:
-    com.airxelerate.inventory: DEBUG
-    org.springframework.security: DEBUG
+    com.airxelerate.inventory: ${airxelerate.inventory.logging.level:INFO}
+    org.springframework.security: ${airxelerate.inventory.logging.level.security:INFO}
+
 
 # OpenAPI
 springdoc:
