@@ -4,6 +4,7 @@ import com.airxelerate.inventory.persistence.entity.user.Role;
 import com.airxelerate.inventory.persistence.entity.user.User;
 import com.airxelerate.inventory.persistence.repository.user.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +20,7 @@ import java.util.Collections;
  * Custom UserDetailsService implementation for Spring Security
  * Loads user details from the database
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
@@ -28,8 +30,15 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        log.debug("Loading user by username='{}'", username);
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> {
+                    log.warn("User not found with username='{}'", username);
+                    return new UsernameNotFoundException("User not found with username: " + username);
+                });
+
+        log.debug("User found: username='{}', role='{}', enabled={}",
+                user.getUsername(), user.getRole(), user.isEnabled());
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())

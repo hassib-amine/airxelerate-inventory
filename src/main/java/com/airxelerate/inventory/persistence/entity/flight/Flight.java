@@ -9,11 +9,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import org.hibernate.annotations.SQLDelete;
 
 @Entity
 @Table(name = "flights", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"carrier_code", "flight_number", "flight_date"})
 })
+@SQLDelete(sql = "UPDATE flights SET deleted = true WHERE id = ?")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -46,4 +48,11 @@ public class Flight {
     @Pattern(regexp = "^[A-Z]{3}$", message = "Destination must be 3 uppercase letters")
     @NotBlank(message = "Destination is required")
     private String destination;
+
+    /**
+     * Soft delete flag.
+     * When true, the record is considered deleted.
+     */
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 }

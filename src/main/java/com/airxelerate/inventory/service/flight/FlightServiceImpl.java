@@ -8,19 +8,20 @@ import com.airxelerate.inventory.usecase.request.flight.FlightRequest;
 import com.airxelerate.inventory.usecase.response.common.PagedResponse;
 import com.airxelerate.inventory.usecase.response.flight.FlightResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Flight Service Implementation
  * Handles business logic for flight operations
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class FlightServiceImpl implements FlightService {
 
     private final FlightJpaRepository flightRepository;
@@ -37,26 +38,39 @@ public class FlightServiceImpl implements FlightService {
     @Override
     @Transactional(readOnly = true)
     public FlightResponse getFlightById(Long id) {
-        Flight flight = flightRepository.findById(id)
-                .orElseThrow(() -> new FlightNotFoundException("Flight not found with id: " + id));
+        log.debug("Retrieving flight with id={}", id);
+        Flight flight = flightRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> {
+                    log.warn("Flight not found (or soft deleted) with id={}", id);
+                    return new FlightNotFoundException("Flight not found with id: " + id);
+                });
+        log.debug("Flight found with id={}", id);
         return flightMapper.toResponse(flight);
     }
 
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<FlightResponse> getAllFlights(Pageable pageable) {
-        Page<Flight> flightPage = flightRepository.findAll(pageable);
+        log.debug("Retrieving flights page: page={}, size={}, sort={}",
+                pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+        Page<Flight> flightPage = flightRepository.findByDeletedFalse(pageable);
         Page<FlightResponse> responsePage = flightPage.map(flightMapper::toResponse);
+        log.debug("Retrieved {} flights (totalElements={})",
+                responsePage.getNumberOfElements(), responsePage.getTotalElements());
         return PagedResponse.of(responsePage);
     }
 
     @Override
     @Transactional
     public void deleteFlight(Long id) {
-        if (!flightRepository.existsById(id)) {
+        log.info("Soft deleting flight with id={}", id);
+        if (!flightRepository.existsByIdAndDeletedFalse(id)) {
+            log.warn("Attempted to soft delete non-existing or already deleted flight with id={}", id);
             throw new FlightNotFoundException("Flight not found with id: " + id);
         }
+        // Triggers @SQLDelete → sets deleted = true (soft delete)
         flightRepository.deleteById(id);
+        log.info("Flight with id={} soft deleted successfully", id);
     }
 }
 

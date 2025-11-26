@@ -6,6 +6,7 @@ import com.airxelerate.inventory.security.JwtTokenProvider;
 import com.airxelerate.inventory.usecase.request.user.LoginRequest;
 import com.airxelerate.inventory.usecase.response.user.AuthResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Authentication Service Implementation
  * Handles user authentication and JWT token generation
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -29,20 +31,30 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public AuthResponse authenticate(LoginRequest loginRequest) {
+        String username = loginRequest.username();
+        log.info("Authentication attempt for username='{}'", username);
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            loginRequest.username(),
+                            username,
                             loginRequest.password()
                     )
             );
 
-            String token = tokenProvider.generateToken(authentication);
-            User user = userRepository.findByUsername(loginRequest.username())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + loginRequest.username()));
+            log.debug("Authentication successful for username='{}'", username);
 
-            return new AuthResponse(token, loginRequest.username(), user.getRole().name());
+            String token = tokenProvider.generateToken(authentication);
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> {
+                        log.error("User entity not found after successful authentication, username='{}'", username);
+                        return new UsernameNotFoundException("User not found: " + username);
+                    });
+
+            log.info("JWT token generated for username='{}', role='{}'", username, user.getRole().name());
+
+            return new AuthResponse(token, username, user.getRole().name());
         } catch (BadCredentialsException e) {
+            log.warn("Authentication failed for username='{}': invalid credentials", username);
             throw new BadCredentialsException("Invalid username or password");
         }
     }
