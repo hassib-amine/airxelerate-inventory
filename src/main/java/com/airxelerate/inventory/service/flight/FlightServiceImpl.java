@@ -8,6 +8,8 @@ import com.airxelerate.inventory.usecase.request.flight.FlightRequest;
 import com.airxelerate.inventory.usecase.response.common.PagedResponse;
 import com.airxelerate.inventory.usecase.response.flight.FlightResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,7 @@ public class FlightServiceImpl implements FlightService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "flights", allEntries = true)
     public FlightResponse createFlight(FlightRequest request) {
         Flight flight = flightMapper.toEntity(request);
         Flight savedFlight = flightRepository.save(flight);
@@ -50,6 +53,7 @@ public class FlightServiceImpl implements FlightService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "flights", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort.toString()")
     public PagedResponse<FlightResponse> getAllFlights(Pageable pageable) {
         log.debug("Retrieving flights page: page={}, size={}, sort={}",
                 pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
@@ -62,6 +66,7 @@ public class FlightServiceImpl implements FlightService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "flights", allEntries = true)
     public void deleteFlight(Long id) {
         log.info("Soft deleting flight with id={}", id);
         if (!flightRepository.existsByIdAndDeletedFalse(id)) {
