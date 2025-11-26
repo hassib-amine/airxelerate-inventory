@@ -64,8 +64,8 @@ airxelerate:
   inventory:
     datasource:
       url: jdbc:mysql://localhost:3306/airxelerate_inventory_db?createDatabaseIfNotExist=true&serverTimezone=UTC
-      username: root
-      password: root
+      username: user
+      password: password
     jpa:
       ddl-auto: update
       show-sql: true
@@ -101,7 +101,6 @@ mvn spring-boot:run
 
 Run the `FlightInventoryApplication` class directly from your IDE.
 
-#### Option 3: Using JAR
 
 ```bash
 mvn clean package
@@ -212,24 +211,10 @@ Authorization: Bearer <token>
 
 ## 🧪 Testing
 
-### Run All Tests
-
-```bash
-mvn test
-```
-
-### Run Specific Test Class
-
-```bash
-mvn test -Dtest=FlightServiceImplTest
-```
-
 ### Test Coverage
 
 The project includes comprehensive unit tests for:
 - **Service Layer**: `FlightServiceImplTest`, `AuthServiceImplTest`
-- **Controller Layer**: Controller tests (when implemented)
-
 ## 📁 Project Structure
 
 ```
@@ -302,12 +287,8 @@ src/
         │   ├── flight/
         │   │   └── FlightServiceImplTest.java
         │   └── user/
-        │       └── AuthServiceImplTest.java
-        └── controller/              # Controller tests
-            ├── auth/
-            │   └── AuthControllerTest.java
-            └── flight/
-                └── FlightControllerTest.java
+               └── AuthServiceImplTest.java
+
 ```
 
 ## 🔄 Caching
@@ -348,51 +329,15 @@ airxelerate:
     server:
       port: 8080  # Change to available port
 ```
-
-### Database Connection Issues
-1. Verify MySQL is running
-2. Check database credentials in `application-local.yml`
-3. Ensure the database exists or MySQL user has `CREATE DATABASE` permission
-
-### JWT Token Issues
-- Verify the JWT secret is configured correctly
-- Check token expiration time (default: 1 hour)
-- Ensure the token is included in the `Authorization` header with `Bearer ` prefix
-
-### Build Errors
-```bash
-mvn clean install -U
-```
-The `-U` flag forces Maven to update dependencies.
-
-## 📝 Environment Variables
-
-You can override configuration using environment variables:
-
-```bash
-export AIRXELERATE_INVENTORY_ENV=local
-export AIRXELERATE_INVENTORY_DATASOURCE_URL=jdbc:mysql://localhost:3306/airxelerate_inventory_db
-export AIRXELERATE_INVENTORY_DATASOURCE_USERNAME=root
-export AIRXELERATE_INVENTORY_DATASOURCE_PASSWORD=root
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
 ## 📄 License
 
 This project is part of an assessment test for Axlab.
 
 ## 👤 Author
 
-Assessment Test Project for Axlab
+HASSIB Amine
 
 ---
 
-**Happy Coding! 🚀**
+
 
